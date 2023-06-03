@@ -38,7 +38,7 @@ private:
 		value = *buffer++;
 		readValue((unsigned long long*)buffer, others...);
 	}
-	void readNPrintValue()
+	void readNPrintValue(unsigned long long* address)
 	{
 		std::cout << '\n';
 		return;
@@ -50,7 +50,7 @@ private:
 		T* buffer = (T*)address;
 		value = *buffer++;
 		std::cout << value << ' ';
-		readNPrintValue((unsigned long long*)buffer, others);
+		readNPrintValue((unsigned long long*)buffer, others...);
 	}
 public:
 	LinkNode<Args...>* next;

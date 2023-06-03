@@ -20,7 +20,6 @@ private:
 		return sizeof(type) + getSize(others...);
 	}
 public:
-
 	LinkList()
 	{
 		length = 0;
