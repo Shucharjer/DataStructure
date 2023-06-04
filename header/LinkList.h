@@ -130,6 +130,7 @@ public:
 	{
 		return length;
 	}
+	// 指定位置插入
 	void add(unsigned short index, Args... args)
 	{
 		if (size == 0)
@@ -156,6 +157,7 @@ public:
 		prev = nullptr;
 		length++;
 	}
+	// 默认尾插
 	void add(Args... args)
 	{
 		if (size == 0)
@@ -247,6 +249,7 @@ public:
 		{
 			node->printValue(args...);
 			node = node->next;
+			std::cout << '\n';
 		}
 	}
 	unsigned short getKinds()

@@ -1,4 +1,4 @@
-//#include<stdlib.h>
+#pragma once
 #include<iostream>
 template <class ...Args>
 class SeqList
