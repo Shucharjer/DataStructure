@@ -187,4 +187,16 @@ public:
 		length--;
 		return true;
 	}
+	unsigned short getElementSize()
+	{
+		return singleSize;
+	}
+	unsigned short getLength()
+	{
+		return length;
+	}
+	unsigned short getCapacity()
+	{
+		return capacity;
+	}
 };

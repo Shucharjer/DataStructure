@@ -1,12 +1,14 @@
 #pragma once
 #include"LinkNode.h"
-#include<iostream>
 template <class ...Args>
 class LinkList
 {
 private:
+	// 链表的长度
 	unsigned short length;
+	// 一个参数包的字节数
 	unsigned short size;
+	// 一个参数包中的参数个数
 	unsigned short kinds;
 	LinkNode<Args...>* head;
 	LinkNode<Args...>* rear;
@@ -28,6 +30,7 @@ public:
 		head = nullptr;
 		rear = nullptr;
 	}
+	// 赋值操作符
 	LinkList<Args...>& operator = (const LinkList<Args...>& obj)
 	{
 		length = obj.length;
@@ -67,6 +70,7 @@ public:
 		}
 		return *this;
 	}
+	// 拷贝构造
 	LinkList(const LinkList<Args...>& obj)
 	{
 		length = obj.length;
@@ -101,13 +105,22 @@ public:
 	{
 		while (head)
 		{
-			// delete用于释放new在堆中动态生成的对象空间。 释放时会自动调用类的析构函数，在析构函数中用于释放类内部动态分配的得到的资源
+			// delete用于释放new在堆中动态生成的对象空间。
+			// 释放时会自动调用类的析构函数，在析构函数中用于释放类内部动态分配的得到的资源
+			// 因为在链结点的析构函数中delete掉了链结点new出来的内存
+			// 所以不需要先delete掉链结点中new出来的内存
 			rear = head->next;
 			delete head;
 			head = rear;
 		}
-		head = nullptr;
-		rear = nullptr;
+		// 当跳出循环时
+		// head为nullptr
+		// 而head又是从rear那里赋值得到的
+		// 所以rear也为nullptr
+		// 不需要下面的两条语句也不会出现野指针
+		// head = nullptr;
+		// rear = nullptr;
+		// 该析构可适用于其它拥有两个指针的结构中，如链栈和链队列
 	}
 	unsigned short getElementSize()
 	{
@@ -235,5 +248,9 @@ public:
 			node->printValue(args...);
 			node = node->next;
 		}
+	}
+	unsigned short getKinds()
+	{
+		return kinds;
 	}
 };

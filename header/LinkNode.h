@@ -1,11 +1,22 @@
 #pragma once
 #include<iostream>
+/// <summary>
+/// 链结点
+/// 这一系列的结构都可以存储任意的数据
+/// 需要动态使用内存
+/// 所以对内存的操作会非常多
+/// 而且几乎处处需要重写拷贝构造和赋值操作符
+/// </summary>
+/// <typeparam name="...Args"></typeparam>
 template <class ...Args>
 class LinkNode
 {
 private:
-	// unsigned __int64刚好是一个64位指针的大小
-	// 虽然指针的大小与类型无关，但是方便debug，而不是直接在内存中查看）
+	// operator new与new的区别是：operator new只申请一块内存，new除了申请一块类型外，还会执行对应的构造函数
+	// 因为在这个结点类中只使用了operator new
+	// 而没使用new
+	// 操作系统一旦确定，指针的大小就是固定的
+	// 所以使用指向任何类型的指针都是可以的
 	unsigned long long* data;
 	unsigned short size;
 	void initializeData()
