@@ -1,88 +1,190 @@
-#include<stdlib.h>
+//#include<stdlib.h>
+#include<iostream>
 template <class ...Args>
 class SeqList
 {
 private:
-	unsigned long long* data;
+	char* data;
+	unsigned short singleSize;
 	unsigned short length;
-	unsigned short singlesize;
-	unsigned short size;
-
+	unsigned short capacity;
 	unsigned short getSize()
 	{
 		return 0;
 	}
 	template <class T, class ...OtherArgs>
-	unsigned short getSize(T val, OtherArgs... others)
+	unsigned short getSize(T value, OtherArgs... others)
 	{
-		return sizeof(val) + getSize(others...);
+		return sizeof(value) + getSize(others...);
 	}
-	void copyFrom(unsigned long long* sourceAddress)
+	void checkSingleSize(Args... args)
 	{
-		if (this->data == nullptr)
+		if (singleSize == 0)
 		{
-			return;
+			singleSize = getSize(args...);
 		}
-		char* targetAddress = (char*)this->data;
-		char* buffer = (char*)sourceAddress;
-		for (int i = 0; i < this->size * this->singlesize; i++)
+	}
+	void checkData()
+	{
+		if (data == nullptr)
 		{
-			*targetAddress++ = *buffer++;
+			do data = (char*)operator new(singleSize * capacity);
+			while (data == nullptr);
 		}
+	}
+	void checkCapacity()
+	{
+		if (length == capacity)
+		{
+			char* newData;
+			unsigned short newCapacity = capacity + 16;
+			do newData = (char*)operator new(singleSize * newCapacity);
+			while (newData == nullptr);
+			memmove(newData, data, singleSize * capacity);
+			operator delete(data, singleSize * capacity);
+			data = newData;
+			capacity = newCapacity;
+		}
+	}
+	void writeValue(char* address)
+	{
+		return;
+	}
+	template <class T, class ...OtherArgs>
+	void writeValue(char* address, T value, OtherArgs... others)
+	{
+		if (address >= data + singleSize * (length + 2)) return;
+		T* buffer = (T*)address;
+		*buffer++ = value;
+		writeValue((char*)buffer, others...);
+	}
+	void readValue(char* address, unsigned short index)
+	{
+		return;
+	}
+	template <class T, class ...OtherArgs>
+	void readValue(char* address, unsigned short index, T& value, OtherArgs&... others)
+	{
+		if (address >= data + singleSize * index) return;
+		T* buffer = (T*)address;
+		value = *buffer++;
+		readValue((char*)buffer, index, others...);
 	}
 public:
 	SeqList()
 	{
-		this->data = nullptr;
-		this->length = 0;
-		this->size = 32;
+		data = nullptr;
+		singleSize = 0;
+		length = 0;
+		capacity = 32;
 	}
-	SeqList<Args...>& operator = (const SeqList<Args...>& obj)
+	SeqList<Args...>& operator=(const SeqList<Args...>& obj)
 	{
-		if (obj.data == nullptr)
+		singleSize = obj.singleSize;
+		if (singleSize != 0)
 		{
-			this->data = nullptr;
-			this->length = 0;
-			this->next = nullptr;
+			// obj里装过东西，即需要复制内存
+			if (capacity != obj.capacity)
+			{
+				if (data != nullptr)
+				{
+					operator delete(data, singleSize * capacity);
+				}
+				do data = (char*)operator new(singleSize * obj.capacity);
+				while (data == nullptr);
+				capacity = obj.capacity;
+			}
+			memmove(data, obj.data, singleSize * capacity);
 		}
-		else
-		{
-			this->singlesize = obj.singlesize;
-			this->data = (unsigned long long*)malloc(obj.size * this->singlesize);
-			this->size = obj.size;
-			copyFrom(obj.data);
-			this->length = obj.length;
-		}
+		length = obj.length;
+		return *this;
 	}
 	SeqList(const SeqList<Args...>& obj)
 	{
-		this->singlesize = obj.singlesize;
-		this->length = obj.length;
-		this->size = obj.size;
-		this->data = (unsigned long long*)malloc(this->size * this->singlesize);
-		this->copyFrom(obj.data);
+		singleSize = obj.singleSize;
+		length = obj.length;
+		capacity = obj.capacity;
+
+		if (obj.singleSize == 0)
+		{
+			data = nullptr;
+		}
+		else
+		{
+			do data = (char*)operator new(singleSize * capacity);
+			while (data == nullptr);
+
+			if (length)
+			{
+				memmove(data, obj.data, singleSize * capacity);
+			}
+		}
 	}
 	~SeqList()
 	{
-		if (this->data != nullptr)
+		if (data != nullptr)
 		{
-			free(data);
+			operator delete(data, singleSize * capacity);
+			data = nullptr;
 		}
 	}
-	void add(Args... args)
+	bool add(unsigned short index, Args... args)
 	{
-		if (this->singlesize == 0)
+		if (length + 1 < index) return false;
+		checkSingleSize(args...);
+		checkData();
+		checkCapacity();
+		unsigned long long addr = (unsigned long long)data;
+		memmove((void*)(addr + singleSize * index), (void*)(addr + singleSize * (index - 1)), singleSize * (length - index + 1));
+		addr += singleSize * (index - 1);
+		writeValue((char*)addr, args...);
+		length++;
+		return true;
+	}
+	bool add(Args... args)
+	{
+		return add(length + 1, args...);
+	}
+	bool get(unsigned short index, Args&... args)
+	{
+		if (length < index || length == 0) return 0;
+		char* addr = data + singleSize * (index - 1);
+		readValue(addr, index, args...);
+		return true;
+	}
+	bool get(Args&... args)
+	{
+		if (length == 0)
 		{
-			this->singlesize = getSize(args...);
+			return false;
 		}
-		if (this->data == nullptr)
+		char* addr = data + singleSize * (length - 1);
+		readValue(addr, length, args...);
+		return true;
+	}
+	bool remove(unsigned short index, Args&... args)
+	{
+		if (length == 0 || length < index)
 		{
-			this->data = (unsigned long long*)malloc(this->singlesize * 32);
+			return false;
 		}
-		if (this->length == this->size)
+		char* addr = data + singleSize * (index - 1);
+		readValue(addr, index, args...);
+		memmove(addr, addr + singleSize, singleSize * (length - index));
+		memset(data + singleSize * (length - 1), 0, singleSize);
+		length--;
+		return true;
+	}
+	bool remove(unsigned short index)
+	{
+		if (length == 0 || length < index)
 		{
-			free(this->data);
-
+			return false;
 		}
+		char* addr = data + singleSize * (index - 1);
+		memmove(addr, addr + singleSize, singleSize * (length - index));
+		memset(data + singleSize * (length - 1), 0, singleSize);
+		length--;
+		return true;
 	}
 };

@@ -5,14 +5,13 @@ class LinkNode
 {
 private:
 	// unsigned __int64刚好是一个64位指针的大小
+	// 虽然指针的大小与类型无关，但是方便debug，而不是直接在内存中查看）
 	unsigned long long* data;
 	unsigned short size;
 	void initializeData()
 	{
-		do
-		{
-			data = (unsigned long long*)operator new(size);
-		} while (data == nullptr);
+		do data = (unsigned long long*)operator new(size);
+		while (data == nullptr);
 	}
 	void writeValue(unsigned long long* address)
 	{
