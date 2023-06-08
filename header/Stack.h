@@ -171,12 +171,31 @@ public:
 			node = node->next;
 		}
 		node->next->getValue(args...);
-		top = node;
+		if (node->next == but)
+		{
+			top = nullptr;
+			but = nullptr;
+		}
+		else
+		{
+			top = node;
+		}
 		delete node->next;
 		node->next = nullptr;
 		delete temp;
 		length--;
 		return true;
+	}
+	bool clear()
+	{
+		if (length == 0) return false;
+		while (but)
+		{
+			top = but->next;
+			delete but;
+			but = top;
+		}
+		length = 0;
 	}
 	bool getTop(Args&... args)
 	{
@@ -192,5 +211,15 @@ public:
 			node->printValue(args...);
 			node = node->next;
 		}
+	}
+	void getInput()
+	{
+		return;
+	}
+	template <class T, class ...OtherArgs>
+	void getInput(T& value, OtherArgs&... others)
+	{
+		std::cin >> value;
+		getInput(others...);
 	}
 };

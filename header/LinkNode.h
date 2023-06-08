@@ -34,7 +34,7 @@ private:
 	template <class T, class ...OtherArgs>
 	void writeValue(unsigned long long* address, T value, OtherArgs... others)
 	{
-		if (address >= data + size) return;
+		//if (address >= data + size) return;
 		T* buffer = (T*)address;
 		*buffer++ = value;
 		writeValue((unsigned long long*)buffer, others...);
@@ -46,7 +46,7 @@ private:
 	template <class T, class ...OtherArgs>
 	void readValue(unsigned long long* address, T& value, OtherArgs&... others)
 	{
-		if (address >= data + size) return;
+		//if (address >= data + size) return;
 		T* buffer = (T*)address;
 		value = *buffer++;
 		readValue((unsigned long long*)buffer, others...);
@@ -59,7 +59,7 @@ private:
 	template <class T, class ...OtherArgs>
 	void readNPrintValue(unsigned long long* address, T& value, OtherArgs&... others)
 	{
-		if (address >= data + size) return;
+		//if (address >= data + size) return;
 		T* buffer = (T*)address;
 		value = *buffer++;
 		std::cout << value << ' ';
@@ -115,6 +115,14 @@ public:
 		}
 		next = nullptr;
 	}
+	// 重载等号为在内存中比较它们的值
+	bool operator == (const LinkNode<Args...>& obj)
+	{
+		if (this->data != nullptr && obj.data != nullptr)
+			return !memcmp(data, obj.data, size);
+		else
+			return false;
+	}
 	void setValue(unsigned short size, Args... args)
 	{
 		if (this->size == 0) this->size = size;
@@ -135,6 +143,10 @@ public:
 		}
 		data = nullptr;
 	}
+	// 传值，用值的引用，不改变原来的值的大小
+	// 因为没有存储参数包中每个类型占的字节数，只是为了方便打印把参数包传进去
+	// 在之后的其它结构中也会使用这种方式
+	// （越写越感觉起初的代码写得很糟糕）
 	void printValue(Args... args)
 	{
 		readNPrintValue(data, args...);

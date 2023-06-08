@@ -174,4 +174,14 @@ public:
 			node = node->next;
 		}
 	}
+	void getInput()
+	{
+		return;
+	}
+	template <class T, class ...OtherArgs>
+	void getInput(T& value, OtherArgs&... others)
+	{
+		std::cin >> value;
+		getInput(others...);
+	}
 };

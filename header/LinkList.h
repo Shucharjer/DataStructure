@@ -1,5 +1,6 @@
 #pragma once
 #include"LinkNode.h"
+// 由于使用模板，继承比较困难，也不能很好地把声明与实现分开
 template <class ...Args>
 class LinkList
 {
@@ -212,6 +213,7 @@ public:
 			delete head;
 			head = nullptr;
 			rear = nullptr;
+			return true;
 		}
 		LinkNode<Args...>* prev = new LinkNode<Args...>();
 		void* addr = (void*)prev;
@@ -231,6 +233,11 @@ public:
 			delete prev->next;
 			prev->next = nullptr;
 		}
+		else if (prev->next == head)
+		{
+			head = prev->next->next;
+			delete prev->next;
+		}
 		else
 		{
 			void* temp = (void*)prev->next;
@@ -242,18 +249,102 @@ public:
 		length--;
 		return true;
 	}
-	void print(Args&... args)
+	bool remove(unsigned short index)
+	{
+		if (length == 0 || length < index) return false;
+		if (length == 1)
+		{
+			delete head;
+			head = nullptr;
+			rear = nullptr;
+			return true;
+		}
+		LinkNode<Args...>* prev = new LinkNode<Args...>();
+		void* addr = (void*)prev;
+		// 问题来源：prev的值变了，而不是prev指向的值变了
+		// 直接delete的话，prev本身的那块内存不会被释放掉
+		// 所以需要记录一下prev的值，在结束时delete掉
+		prev->next = head;
+		for (int i = 1; i < index; i++)
+		{
+			prev = prev->next;
+		}
+		// prev指在要删除的结点的前一个结点
+		//prev->next->getValue(args...);
+		if (prev->next == rear)
+		{
+			rear = prev;
+			delete prev->next;
+			prev->next = nullptr;
+		}
+		else if (prev->next == head)
+		{
+			head = prev->next->next;
+			delete prev->next;
+		}
+		else
+		{
+			void* temp = (void*)prev->next;
+			(*prev).next = (*prev).next->next;
+			delete temp;
+		}
+		delete addr;
+		
+		length--;
+		return true;
+	}
+	void print(Args... args)
 	{
 		LinkNode<Args...>* node = head;
 		while (node)
 		{
 			node->printValue(args...);
 			node = node->next;
-			std::cout << '\n';
+			//std::cout << '\n';
 		}
 	}
 	unsigned short getKinds()
 	{
 		return kinds;
+	}
+	void getInput()
+	{
+		return;
+	}
+	// 统一获取输入，否则会需要大量的语句来协调输入的类型与次数
+	template <class T, class ...OtherArgs>
+	void getInput(T& value, OtherArgs&... others)
+	{
+		std::cin >> value;
+		getInput(others...);
+	}
+	unsigned short find(Args... args)
+	{
+		if (length == 0) return 0;
+		LinkNode<Args...>* temp = new LinkNode<Args...>();
+		temp->setValue(size, args...);
+		LinkNode<Args...>* node = head;
+		for (int index = 1; index <= length; index++)
+		{
+			if ((*temp) == (*node))
+			{
+				return index;
+			}
+			node = node->next;
+		}
+		delete temp;
+		return 0;
+	}
+	bool clear()
+	{
+		if (length == 0) return false;
+		while (head)
+		{
+			rear = head->next;
+			delete head;
+			head = rear;
+		}
+		length = 0;
+		return true;
 	}
 };

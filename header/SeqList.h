@@ -53,7 +53,7 @@ private:
 	template <class T, class ...OtherArgs>
 	void writeValue(char* address, T value, OtherArgs... others)
 	{
-		if (address >= data + singleSize * (length + 2)) return;
+		//if (address >= data + singleSize * (length + 2)) return;
 		T* buffer = (T*)address;
 		*buffer++ = value;
 		writeValue((char*)buffer, others...);
@@ -65,7 +65,7 @@ private:
 	template <class T, class ...OtherArgs>
 	void readValue(char* address, unsigned short index, T& value, OtherArgs&... others)
 	{
-		if (address >= data + singleSize * index) return;
+		//if (address >= data + singleSize * index) return;
 		T* buffer = (T*)address;
 		value = *buffer++;
 		readValue((char*)buffer, index, others...);
@@ -198,5 +198,15 @@ public:
 	unsigned short getCapacity()
 	{
 		return capacity;
+	}
+	void getInput()
+	{
+		return;
+	}
+	template <class T, class ...OtherArgs>
+	void getInput(T& value, OtherArgs&... others)
+	{
+		std::cin >> value;
+		getInput(others...);
 	}
 };
